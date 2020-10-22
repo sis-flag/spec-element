@@ -1,0 +1,440 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{ctex}
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{abstract,appendix}
+\usepackage{makeidx,hyperref}
+\usepackage{graphicx,epsfig,subfig}
+\usepackage{geometry}
+\usepackage{xcolor}
+
+\geometry{scale=0.8}
+
+%\setlength{\lineskip}{\baselineskip}
+%\setlength{\parskip}{0.5\baselineskip}
+
+\title{谱元法笔记2}
+\author{sis-flag}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{一维情况}
+
+求解区域$\Omega = [0,1]$。
+
+特征值问题
+\begin{align*}
+- (a(x) u'(x))' + b(x) u'(x) + c(x) u(x) = \lambda u(x) \qquad x \in \Omega
+\end{align*}
+源项问题
+\begin{align*}
+- (a(x) u'(x))' + b(x) u'(x) + c(x) u(x) = f(x) \qquad x \in \Omega
+\end{align*}
+其中$a(x), b(x), c(x), f(x)$是有界，分片连续的已知函数。$a(x)$有大于0的下界。
+
+边界可以是：固定边界
+\begin{align*}
+u(0) = u_0 \quad \text{and} \quad u(1) = u_1
+\end{align*}
+导数边界（$h(x) \geq 0$）
+\begin{align*}
+-a(0) u'(0) + h(0) u(0) = g(0) \quad \text{and} \quad a(1) u'(1) + h(1) u(0) = g(1)
+\end{align*}
+和周期边界
+\begin{align*}
+u(0) = u(1) \quad \text{and} \quad u'(0) = u'(1)
+\end{align*}
+
+在特征值问题中，边界条件都应是齐次的。
+
+
+\subsection{变分形式}
+
+\subsubsection{固定边界}
+
+固定边界特征值问题对应变分形式
+\begin{align*}
+\text{find} \ \lambda \in \mathbb{C}, u \in H_0^1(\Omega) \quad \int_{\Omega} a u' v' + \int_{\Omega} b u' v + \int_{\Omega} c u v = \lambda \int_{\Omega} u v \quad \forall v \in H_0^1(\Omega)
+\end{align*}
+
+固定边界源项问题对应变分形式
+\begin{align*}
+\text{find} \ u \in H^1(\Omega), u|_{\partial \Omega} = u_0 \quad \int_{\Omega} a u' v' + \int_{\Omega} b u' v + \int_{\Omega} c u v = \int_{\Omega} f v \quad \forall v \in H_0^1(\Omega)
+\end{align*}
+
+积分变量都是$x$，省略。
+
+\subsubsection{导数边界}
+
+导数边界特征值问题对应变分形式
+\begin{align*}
+\text{find} \ \lambda \in \mathbb{C}, u \in H^1(\Omega) \quad \int_{\Omega} a u' v' + \int_{\Omega} b u' v + \int_{\Omega} c u v + \int_{\partial \Omega} h u v = \lambda \int_{\Omega} u v \quad \forall v \in H^1(\Omega)
+\end{align*}
+
+导数边界源项问题对应变分形式
+\begin{align*}
+\text{find} \ u \in H^1(\Omega) \quad \int_{\Omega} a u' v' + \int_{\Omega} b u' v + \int_{\Omega} c u v + \int_{\partial \Omega} h u v = \int_{\Omega} f v + \int_{\partial \Omega} g v \quad \forall v \in H^1(\Omega)
+\end{align*}
+
+\subsubsection{周期边界}
+
+周期边界特征值问题对应变分形式
+\begin{align*}
+\text{find} \ \lambda \in \mathbb{C}, u \in H_{P}^1(\Omega) \quad \int_{\Omega} a u' v' + \int_{\Omega} b u' v + \int_{\Omega} c u v = \lambda \int_{\Omega} u v \quad \forall v \in H_{P}^1(\Omega)
+\end{align*}
+
+周期边界源项问题对应变分形式
+\begin{align*}
+\text{find} \ u \in H_{P}^1(\Omega) \quad \int_{\Omega} a u' v' + \int_{\Omega} b u' v + \int_{\Omega} c u v = \int_{\Omega} f v \quad \forall v \in H_{P}^1(\Omega)
+\end{align*}
+
+
+\subsection{单元基函数}
+
+一维的参考单元$\hat{\Omega} = [-1,1]$，选取参考单元上的一组基函数为
+\begin{align*}
+\varphi_k(x) =
+\left\{ \begin{array}{ll}
+\frac{1}{2} (L_0(x) - L_1(x)) & k = 1 \\
+\frac{1}{\sqrt{4k-2}} (L_{k}(x) - L_{k-2}(x)) & 2 \leq k \leq N \\
+\frac{1}{2} (L_0(x) + L_1(x)) & k = N+1 \\
+\end{array}  \right.
+\end{align*}
+共$N+1$个。其中$L_k(x)$是$k$次勒让德多项式。
+
+此时$\varphi_0$的系数就是函数在左端点的函数值，$\varphi_N$的系数就是函数在右端点的函数值。
+在很多块区域拼起来时，这两个就是边界上的自由度。
+
+根据公式$(2k+1) L_k(x) = L_{k+1}'(x) - L_{k-1}'(x)$得到
+\begin{align*}
+\varphi_k'(x) =
+\left\{ \begin{array}{ll}
+-\frac{1}{2} & k = 1 \\
+\frac{\sqrt{4k-2}}{2} L_{k-1}(x) & 2 \leq k \leq N \\
+\frac{1}{2} & k = N+1 \\
+\end{array} \right.
+\end{align*}
+
+$x_1, \cdots x_{N+1}$和$w_1, \cdots w_{N+1}$是$[-1, 1]$上的高斯积分点和积分权重。
+积分可以近似为
+\begin{align*}
+\int_{-1}^{1} a \varphi_i' \varphi_j' \ dx = \sum_{k=1}^{N+1} w_k a(x_k) \varphi_i'(x_k) \varphi_j'(x_k) \\
+\int_{-1}^{1} b \varphi_i' \varphi_j \ dx = \sum_{k=1}^{N+1} w_k b(x_k) \varphi_i'(x_k) \varphi_j(x_k) \\
+\int_{-1}^{1} c \varphi_i \varphi_j \ dx = \sum_{k=1}^{N+1} w_k c(x_k) \varphi_i(x_k) \varphi_j(x_k) \\
+\int_{-1}^{1} f \varphi_i \ dx = \sum_{k=1}^{N+1} w_k f(x_k) \varphi_i(x_k)
+\end{align*}
+
+在实际计算中，如果已经计算出了
+\begin{align*}
+d\Phi = (\varphi_j'(x_i))_{i,j}^{(N+1) \times (N+1)} \\
+\Phi = (\varphi_j(x_i))_{i,j}^{(N+1) \times (N+1)}
+\end{align*}
+
+例如
+\begin{align*}
+\Phi = \left[
+\begin{array}{cc}
+\varphi_1(x_1) & \varphi_2(x_1) \\
+\varphi_1(x_2) & \varphi_2(x_2)
+\end{array}
+\right]
+\qquad
+d\Phi = \left[
+\begin{array}{cc}
+\varphi_1'(x_1) & \varphi_2'(x_1) \\
+\varphi_1'(x_2) & \varphi_2'(x_2)
+\end{array}
+\right]
+\end{align*}
+
+想要求出
+\begin{align*}
+A^{(l)} & = (\int_{-1}^{1} a \varphi_i' \varphi_j' \ dx)_{i,j}^{(N+1) \times (N+1)} \\
+B^{(l)} & = (\int_{-1}^{1} b \varphi_i \varphi_j' \ dx)_{i,j}^{(N+1) \times (N+1)} \\
+C^{(l)} & = (\int_{-1}^{1} c \varphi_i \varphi_j \ dx)_{i,j}^{(N+1) \times (N+1)} \\
+F^{(l)} & = (\int_{-1}^{1} f \varphi_i \ dx)_{i}^{N+1}
+\end{align*}
+就是
+\begin{align*}
+A^{(l)} & = (d\Phi)^T \cdot diag(a(x_1), \cdots, a(x_{N+1})) \cdot diag(w_1, \cdots, w_{N+1}) \cdot (d\Phi) \\
+B^{(l)} & = \Phi^T \cdot diag(b(x_1), \cdots, b(x_{N+1})) \cdot diag(w_1, \cdots, w_{N+1}) \cdot d\Phi \\
+C^{(l)} & = \Phi^T \cdot diag(c(x_1), \cdots, c(x_{N+1})) \cdot diag(w_1, \cdots, w_{N+1}) \cdot \Phi \\
+F^{(l)} & = \Phi^T \cdot (w_1 f(x_1), \cdots, w_{N+1} f(x_{N+1}))^T
+\end{align*}
+
+\subsection{单元基和全局基}
+
+区域上的网格$0 = x_1 < x_2 < \cdots < x_{M+1} = 1$。
+选取离散空间$V_N$是分片$N$次多项式，而且整体连续的函数空间。
+
+设$\phi_1(x), \phi_2(x), \cdots$是函数空间的一组基，数值解可以表示为
+\begin{align*}
+u_N(x) = \sum_{i} U_i \phi_{i}(x)
+\end{align*}
+全局自由度$U = (U_1, U_2, \cdots, U_N)^T$。
+
+离散问题可以写成矩阵形式
+\begin{align*}
+A U = F \qquad \text{and} \qquad A U = \lambda B U
+\end{align*}
+
+网格把区间分成很多个单元$\Omega^{(m)} (m = 1,2,\cdots,M)$。
+在每个单元上，基函数是$\varphi_i$。数值解可以表示为
+\begin{align*}
+u_N(x) = \sum_{n=1}^{N+1} U_n^{(m)} \varphi_i(\xi) \quad x \in \Omega^{(m)}
+\end{align*}
+局部自由度$U_i^{(m)}$。
+
+由于在单元连接处要连续，可以得到从局部自由度到整体自由度的对应关系为
+\begin{align*}
+U_{(m-1)N + n} \leftrightarrow U_n^{(m)} \quad n = 1,2,\cdots,N+1 \quad m = 1,2,\cdots,M 
+\end{align*}
+对于周期边界条件，对应关系为
+\begin{align*}
+U_{(m-1)N + n} \leftrightarrow U_n^{(m)} \\
+U_{1} \leftrightarrow U_{N+1}^{(M)} 
+\end{align*}
+
+在弱形式中，积分可以写成每个单元上积分的叠加
+\begin{align*}
+\int_{\Omega} a u' v' \ dx = \sum_{m=1}^{M} \int_{\Omega^{(m)}} a u' v' \ dx
+\end{align*}
+
+这样就得到了通过单元刚度矩阵拼接成总体刚度矩阵的方法。
+
+\subsection{仿射变换}
+
+把定义在$\Omega^{(m)}$上的积分和定义在$[-1,1]$上的基函数对应起来。（略）
+
+
+
+
+
+
+
+\section{二维情况}
+
+求解区域$\Omega = [0,1]^2$。
+
+特征值问题
+\begin{align*}
+- \nabla(a(\mathbf{x}) \nabla u(\mathbf{x})) + b(\mathbf{x}) \cdot \nabla u(\mathbf{x}) + c(\mathbf{x}) u(\mathbf{x}) = \lambda u(\mathbf{x}) \qquad \mathbf{x} \in \Omega
+\end{align*}
+源项问题
+\begin{align*}
+- \nabla(a(\mathbf{x}) \nabla u(\mathbf{x})) + b(\mathbf{x}) \cdot \nabla u(\mathbf{x}) + c(\mathbf{x}) u(\mathbf{x}) = f(\mathbf{\mathbf{x}}) \qquad \mathbf{x} \in \Omega
+\end{align*}
+其中$a(\mathbf{x}): \Omega \rightarrow \mathbb{R}^{2 \times 2}, b(\mathbf{x}): \Omega \rightarrow \mathbb{R}^{2}, c(\mathbf{x}): \Omega \rightarrow \mathbb{R}, f(\mathbf{x}): \Omega \rightarrow \mathbb{R}$是有界，分片连续的已知函数。$a(\mathbf{x})$对称正定，特征值有一致的大于0的下界。
+
+边界可以是：固定边界
+\begin{align*}
+u(\mathbf{x}) = u_0(\mathbf{x}) \qquad \mathbf{x} \in \partial \Omega
+\end{align*}
+导数边界（$n$是区域外法向量，$h(\mathbf{x}) \geq 0$）
+\begin{align*}
+\frac{\partial a u}{\partial n}(\mathbf{x}) + h(\mathbf{x}) u(\mathbf{x}) = g(\mathbf{x}) \qquad \mathbf{x} \in \partial \Omega
+\end{align*}
+和周期边界
+\begin{align*}
+u(x, 0) = u(x, 1) \quad \text{and} \quad - \frac{\partial u}{\partial n}(x, 0) = \frac{\partial u}{\partial n}(x, 1) \qquad x \in [0, 1] \\
+u(0, y) = u(1, y) \quad \text{and} \quad - \frac{\partial u}{\partial n}(0, y) = \frac{\partial u}{\partial n}(1, y) \qquad y \in [0, 1]
+\end{align*}
+
+在特征值问题中，边界条件都应是齐次的。
+
+\subsection{变分形式}
+
+（略）
+
+\subsection{单元基函数}
+
+一维的参考单元$\hat{\Omega} = [-1,1]^2$，参考单元上的基函数是张量形式的
+\begin{align*}
+\phi_{i,j}(x, y) = \varphi_i(x) \varphi_j(y)
+\end{align*}
+共$(N+1)^2$个。
+
+$x_1, \cdots x_{N+1}$，$y_1, \cdots y_{N+1}$和$w_1, \cdots w_{N+1}$是$[-1, 1]$上的高斯积分点和积分权重。
+
+把二维的下标拉直成一维，就是
+\begin{align*}
+\mathbf{x}_{i+(j-1)(N+1)} & \leftrightarrow (x_i, y_j) \\
+\mathbf{w}_{i+(j-1)(N+1)} & \leftrightarrow w_i w_j \\
+\phi_{i+(j-1)(N+1)}(\mathbf{x}) & \leftrightarrow \phi_{i,j}(x,y) = \varphi_i(x) \varphi_j(y)
+\end{align*}
+
+liru
+\begin{align*}
+(1,1) \leftrightarrow 1,
+(2,1) \leftrightarrow 2, \cdots
+(N+1,1) \leftrightarrow N+1,
+(1,2) \leftrightarrow N+2, \cdots
+(N+1,N+1) \leftrightarrow (N+1)^2
+\end{align*}
+
+
+二维的基函数矩阵可以由一维情况下的张量积产生，就是
+\begin{align*}
+\Phi_0 = (\phi_j(\mathbf{x}_i))_{i,j}^{(N+1)^2 \times (N+1)^2}  = \Phi \otimes \Phi \\
+\Phi_x = (\nabla_x \phi_j(\mathbf{x}_i))_{i,j}^{(N+1)^2 \times (N+1)^2}  = \Phi \otimes (d\Phi) \\
+\Phi_y = (\nabla_y \phi_j(\mathbf{x}_i))_{i,j}^{(N+1)^2 \times (N+1)^2}  = (d\Phi) \otimes \Phi
+\end{align*}
+其中的符号代表Kronecker张量积。
+
+\begin{align*}
+& \left[
+\begin{array}{cccc}
+\nabla_x \phi_1(\textbf{x}_1) & \nabla_x \phi_2(\textbf{x}_1) & \nabla_x \phi_3(\textbf{x}_1) & \nabla_x \phi_4(\textbf{x}_1) \\
+\nabla_x \phi_1(\textbf{x}_2) & \nabla_x \phi_2(\textbf{x}_2) & \nabla_x \phi_3(\textbf{x}_2) & \nabla_x \phi_4(\textbf{x}_2) \\
+\nabla_x \phi_1(\textbf{x}_3) & \nabla_x \phi_2(\textbf{x}_3) & \nabla_x \phi_3(\textbf{x}_3) & \nabla_x \phi_4(\textbf{x}_3) \\
+\nabla_x \phi_1(\textbf{x}_4) & \nabla_x \phi_2(\textbf{x}_4) & \nabla_x \phi_3(\textbf{x}_4) & \nabla_x \phi_4(\textbf{x}_4)
+\end{array}
+\right] \\
+= &
+\left[
+\begin{array}{cccc}
+\varphi_1'(x_1) \varphi_1(y_1) & \varphi_2'(x_1) \varphi_1(y_1) & \varphi_1'(x_1) \varphi_2(y_1) & \varphi_2'(x_1) \varphi_2(y_1) \\
+\varphi_1'(x_2) \varphi_1(y_1) & \varphi_2'(x_2) \varphi_1(y_1) & \varphi_1'(x_2) \varphi_2(y_1) & \varphi_2'(x_2) \varphi_2(y_1) \\
+\varphi_1'(x_1) \varphi_1(y_2) & \varphi_2'(x_1) \varphi_1(y_2) & \varphi_1'(x_1) \varphi_2(y_2) & \varphi_2'(x_1) \varphi_2(y_1) \\
+\varphi_1'(x_2) \varphi_1(y_2) & \varphi_2'(x_2) \varphi_1(y_2) & \varphi_1'(x_2) \varphi_2(y_2) & \varphi_2'(x_2) \varphi_2(y_2) \\
+\end{array}
+\right]
+\end{align*}
+
+积分可以近似为
+\begin{align*}
+& \int_{-1}^{1} \int_{-1}^{1} (\nabla \phi_{i})^T a (\nabla \phi_{j}) \ dx \\
+= & \sum_{n = 0}^{(N+1)^2} \mathbf{w}_n
+\left[
+\begin{array}{c}
+\nabla_x \phi_i(\mathbf{x}_n) \\
+\nabla_y \phi_i(\mathbf{x}_n)
+\end{array}
+\right]^T
+\left[
+\begin{array}{cc}
+a_{1,1}(\mathbf{x}_n) & a_{1,2}(\mathbf{x}_n) \\
+a_{2,1}(\mathbf{x}_n) & a_{2,2}(\mathbf{x}_n)
+\end{array}
+\right]
+\left[
+\begin{array}{c}
+\nabla_x \phi_j(\mathbf{x}_n) \\
+\nabla_y \phi_j(\mathbf{x}_n)
+\end{array}
+\right] \\
+= & \sum_{n = 0}^{(N+1)^2} \mathbf{w}_n \nabla_x \phi_i(\mathbf{x}_n) a_{1,1}(\mathbf{x}_n) \nabla_x \phi_j(\mathbf{x}_n) \\
++ & \sum_{n = 0}^{(N+1)^2} \mathbf{w}_n \nabla_y \phi_i(\mathbf{x}_n) a_{2,1}(\mathbf{x}_n) \nabla_x \phi_j(\mathbf{x}_n) \\
++ & \sum_{n = 0}^{(N+1)^2} \mathbf{w}_n \nabla_x \phi_i(\mathbf{x}_n) a_{1,2}(\mathbf{x}_n) \nabla_y \phi_j(\mathbf{x}_n) \\
++ & \sum_{n = 0}^{(N+1)^2} \mathbf{w}_n \nabla_y \phi_i(\mathbf{x}_n) a_{2,2}(\mathbf{x}_n) \nabla_y \phi_j(\mathbf{x}_n)
+\end{align*}
+\begin{align*}
+\int_{-1}^{1} \int_{-1}^{1} \phi_{i} b^T (\nabla \phi_{j}) \ dx = & \sum_{n = 0}^{(N+1)^2} \mathbf{w}_n \phi_{i}(\mathbf{x}_n)
+\left[
+\begin{array}{c}
+b_{1}(\mathbf{x}_n) \\
+b_{2}(\mathbf{x}_n)
+\end{array}
+\right]^T
+\left[
+\begin{array}{c}
+\nabla_x \phi_j(\mathbf{x}_n) \\
+\nabla_y \phi_j(\mathbf{x}_n)
+\end{array}
+\right] \\
+= & \sum_{n = 0}^{(N+1)^2} \mathbf{w}_n \phi_i(\mathbf{x}_n) b_1(\mathbf{x}_n) \nabla_x \phi_j(\mathbf{x}_n) \\
++ & \sum_{n = 0}^{(N+1)^2} \mathbf{w}_n \phi_i(\mathbf{x}_n) b_2(\mathbf{x}_n) \nabla_y \phi_j(\mathbf{x}_n)
+\end{align*}
+\begin{align*}
+\int_{-1}^{1} \int_{-1}^{1} \phi_{i} c \phi_{j} \ dx = \sum_{n = 0}^{(N+1)^2} \mathbf{w}_n \phi_{i}(\mathbf{x}_n) c(\mathbf{x}_n) \phi_{j}(\mathbf{x}_n)
+\end{align*}
+\begin{align*}
+\int_{-1}^{1} \int_{-1}^{1} f \phi_{i} \ dx = \sum_{n = 0}^{(N+1)^2} \mathbf{w}_n f(\mathbf{x}_n) \phi_{i}(\mathbf{x}_n)
+\end{align*}
+
+
+写成矩阵的形式
+\begin{align*}
+A^{(l)} & = (\int_{-1}^{1} \int_{-1}^{1} (\nabla \phi_{i})^T a (\nabla \phi_{j}) \ dx)_{i,j}^{(N+1)^2 \times (N+1)^2} \\
+B^{(l)} & = (\int_{-1}^{1} \int_{-1}^{1} \phi_{i} b^T (\nabla \phi_{j}) \ dx)_{i,j}^{(N+1)^2 \times (N+1)^2} \\
+C^{(l)} & = (\int_{-1}^{1} \int_{-1}^{1} \phi_{i} c \phi_{j} \ dx)_{i,j}^{(N+1)^2 \times (N+1)^2} \\
+F^{(l)} & = (\int_{-1}^{1} \int_{-1}^{1} f \phi_{i} \ dx)_{i}^{(N+1)^2}
+\end{align*}
+就是
+\begin{align*}
+A^{(l)} & = \Phi_x^T \cdot diag(\mathbf{w} a_{1,1}(\mathbf{x})) \cdot \Phi_x + \Phi_x^T \cdot diag(\mathbf{w} a_{1,2}(\mathbf{x})) \cdot \Phi_y \\
+& + \Phi_y^T \cdot diag(\mathbf{w} a_{2,1}(\mathbf{x})) \cdot \Phi_x + \Phi_y^T \cdot diag(\mathbf{w} a_{2,2}(\mathbf{x})) \cdot \Phi_y \\
+B^{(l)} & = \Phi_0^T \cdot diag(\mathbf{w} b_1(\mathbf{x})) \cdot \Phi_x + \Phi_0^T \cdot diag(\mathbf{w} b_2(\mathbf{x})) \cdot \Phi_y \\
+C^{(l)} & = \Phi_0^T \cdot diag(\mathbf{w} c(\mathbf{x})) \cdot \Phi \\
+F^{(l)} & = \Phi_0^T \cdot (\mathbf{w} f(\mathbf{x}))^T
+\end{align*}
+
+\subsection{单元基和全局基}
+
+同样的非均匀方形网格。
+
+网格把区间分成很多个单元$\Omega^{(m_x, m_y)} (m_x = 1,2,\cdots,M_x, m_y = 1,2,\cdots,M_y)$。
+
+从局部自由度到整体自由度的对应关系为
+\begin{align*}
+U_{n_x, n_y}^{(m_x, m_y)} \leftrightarrow U_{n_x + (n_y-1)(N+1)}^{(m_x, m_y)} \leftrightarrow U_{(m_x-1)N + n_x, (m_y-1)N + n_y} \leftrightarrow U_{(m_x-1)N + n_x + ((m_y-1)N + (n_y-1))(M_x N + 1)} \\
+n_x, n_y = 1,\cdots,N+1 \quad m_x = 1,\cdots,M_x, m_y = 1,\cdots,M_y
+\end{align*}
+对于周期边界条件，对应关系（略）
+
+\subsection{边界条件的处理}
+
+一维情况下边界条件就是两点，不用特殊说明。周期区域没有边界，只有固定边界和导数边界要详细说明。
+
+这里只考虑下边界，其他边界是一样的。
+
+\subsubsection{导数边界条件}
+
+在参考单元上，对于下边界
+\begin{align*}
+\int_{-1}^{1} \phi_{i,j}(x,0) h(x,0) \phi_{k,l}(x,0) \ dx = 
+\left\{
+\begin{array}{ll}
+\int_{-1}^{1} \varphi_i(x) h(x,0) \varphi_k(x) \ dx & j = l = 1 \\
+0 & j \neq 1 \ \text{or} \ l \neq 1
+\end{array}
+\right.
+\end{align*}
+还有
+\begin{align*}
+\int_{-1}^{1} \phi_{i,j}(x,0) g(x,0) \ dx = 
+\left\{
+\begin{array}{ll}
+\int_{-1}^{1} \varphi_i(x) g(x,0) \ dx & j = 1 \\
+0 & j \neq 1
+\end{array}
+\right.
+\end{align*}
+
+因此，在计算边界上积分的时候，只要考虑边界上对应的自由度。
+
+\subsubsection{固定边界条件}
+
+固定边界条件相当于限制边界上的自由度必须等于某一数值。就是计算函数空间$\{\varphi_i(x)\}$中，对$u_0$的最佳逼近。基函数不正交，直接计算内积无法得到系数。
+
+最佳逼近要满足残量正交，就是
+\begin{align*}
+\int_{-1}^{1} (u_0(x) - \sum_{i=1}^{N+1} u_i \varphi_i(x)) \varphi_j(x) \ dx = 0 \quad j = 1,\cdots,N+1
+\end{align*}
+得到方程组$A u = b$，其中
+\begin{align*}
+A_{i,j} = \int_{-1}^{1} \varphi_i(x) \varphi_j(x) \ dx \qquad b_j = \int_{-1}^{1} u_0(x) \varphi_j(x) \ dx
+\end{align*}
+转换成数值积分的过程略。
+
+\subsection{仿射变换}
+
+（略）大概就是因为区域变换要乘以$h_x h_y$。
+在$x$方向出现导数的要乘以$1/h_x$，在$y$方向出现导数的要乘以$1/h_y$。
+
+
+\end{document}

@@ -1,0 +1,375 @@
+\documentclass[UTF8,12pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{ctex}
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{graphicx,epsfig,subfig}
+\usepackage{makeidx,hyperref}
+\usepackage{geometry}
+\usepackage{xcolor}
+
+\geometry{scale=0.8}
+
+%\setlength{\lineskip}{\baselineskip}
+\setlength{\parskip}{0.5\baselineskip}
+
+\title{谱元法笔记}
+\author{sis-flag}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{问题和离散}
+
+求解区域$\Omega = [0,1]^d$，维数$d = 1, 2$。
+
+Robin边界特征值问题
+\begin{eqnarray}
+- \Delta u(\mathbf{x}) + V(\mathbf{x}) u(\mathbf{x}) = \lambda u(\mathbf{x}) \qquad \mathbf{x} \in \Omega \\
+\frac{\partial u}{\partial n}(\mathbf{x}) + h_0 u(\mathbf{x}) = 0 \qquad \mathbf{x} \in \partial \Omega
+\end{eqnarray}
+
+Robin边界源项问题
+\begin{eqnarray}
+- \Delta u(\mathbf{x}) + V(\mathbf{x}) u(\mathbf{x}) = 1 \qquad \mathbf{x} \in \Omega \\
+\frac{\partial u}{\partial n}(\mathbf{x}) = g_0 \qquad \mathbf{x} \in \partial \Omega
+\end{eqnarray}
+
+Dirichlet边界特征值问题
+\begin{eqnarray}
+- \Delta u(\mathbf{x}) + V(\mathbf{x}) u(\mathbf{x}) = \lambda u(\mathbf{x}) \qquad \mathbf{x} \in \Omega \\
+u(\mathbf{x}) = 0 \qquad \mathbf{x} \in \partial \Omega
+\end{eqnarray}
+
+Dirichlet边界源项问题
+\begin{eqnarray}
+- \Delta u(\mathbf{x}) + V(\mathbf{x}) u(\mathbf{x}) = 1 \qquad \mathbf{x} \in \Omega \\
+u(\mathbf{x}) = 0 \qquad \mathbf{x} \in \partial \Omega
+\end{eqnarray}
+
+一维的情况时，区域$\Omega=[0,1]$被均匀分成$M$个方格$\Omega^{(m)}$($m = 0, 1, \cdots, M-1$)，二维时，$V(x)$区域$\Omega=[0,1] \times [0,1]$被均匀分成$M_1 \times M_2$个方格$\Omega^{(m_1, m_2)}$($m_1, m_2 = 0, 1, \cdots, M-1$)。在每个方格上$V(\mathbf{x})$是分片常数，而且大于0。
+
+Robin边界特征值问题对应变分形式
+\begin{equation}
+\text{find} \ \lambda, u \in \mathbb{C} \times H^1(\Omega) \quad (\nabla u, \nabla v) + (V u, v) + h_0 (u, v)_{\partial\Omega} = \lambda (u, v) \qquad \forall v \in  H^1(\Omega)
+\end{equation}
+
+Robin边界源项问题对应变分形式
+\begin{equation}
+\text{find} \ u \in H^1(\Omega) \quad (\nabla u, \nabla v) + (V u, v) = (f, v) + (g_0, v)_{\partial\Omega} \qquad \forall v \in  H^1(\Omega)
+\end{equation}
+
+Dirichlet边界特征值问题对应变分形式
+\begin{equation}
+\text{find} \ \lambda, u \in \mathbb{C} \times H_0^1(\Omega) \quad (\nabla u, \nabla v) + (V u, v) = \lambda (u, v) \qquad \forall v \in  H_0^1(\Omega)
+\end{equation}
+
+Dirichlet边界源项问题对应变分形式
+\begin{equation}
+\text{find} \ u \in H_0^1(\Omega) \quad (\nabla u, \nabla v) + (V u, v) = (f, v) \qquad \forall v \in  H_0^1(\Omega)
+\end{equation}
+
+其中区域内部和边界上的内积定义为
+$$ (u, v) = \int_\Omega u(x) v(x) \ dx \qquad (u, v)_{\partial\Omega} = \int_{\partial\Omega} u(x) v(x) \ dx $$
+
+区域被分成的方格就是天然的剖分。选取$V_N$是分片$N$次多项式，而且整体连续的函数空间。$V_N^0$是在$V_N$中，且边界为0的函数空间。
+
+问题离散形式就是在变分形式中把空间选取为$V_N$和$V_N^0$。
+
+设$\phi_1(\mathbf{x}), \phi_2(\mathbf{x}), \cdots \phi_N(\mathbf{x})$是函数空间的一组基，数值解$u_N(\mathbf{x})$可以表示为
+$$ u_N(\mathbf{x}) = \sum_{i=1}^{N} U_i \phi_{i}(x) $$
+
+系数向量$U = (U_1, U_2, \cdots, U_N)^T$。离散问题可以写成矩阵形式
+\begin{equation}
+A U = F \qquad \text{and} \qquad A U = \lambda B U
+\end{equation}
+
+其中矩阵元素为
+$$ A_{i,j} = (\nabla \phi_i, \nabla \phi_j) + (V \phi_i, \phi_j) + (h_0 \phi_i, \phi_j)_{\partial\Omega} $$
+$$ B_{i,j} = (\phi_i, \phi_j) \qquad F_i = (f, \phi_i) + (g_0, \phi_i)_{\partial\Omega} $$
+
+内积中的积分可以表示为
+$$ (u, v) = \sum_{m=0}^{M} \int_{\Omega^{(m)}} u(x) v(x) \ dx $$
+边界上的内积也类似。所以只需要求出单元上的矩阵$A^{(m)},B^{(m)},F^{(m)}$然后按照一定规则拼合起来，就可以得到全局的矩阵。
+
+\section{单元基函数}
+
+\subsection{一维的情况}
+
+一维的参考单元$\hat{\Omega} = [-1,1]$，选取参考单元上的一组基函数为
+\begin{equation}
+\phi_k(x) = \left\{ \begin{array}{ll}
+(1-x)/2 = (L_0(x) - L_1(x))/2 & k = 0 \\
+(L_{k+1}(x) - L_{k-1}(x)) / \sqrt{4k+2} & 1 \leq k \leq N-1 \\
+(1+x)/2 = (L_0(x) + L_1(x))/2 & k = N \\
+\end{array}  \right.
+\end{equation}
+共$N+1$个，编号从0开始。其中$L(x)$是勒让德多项式。
+
+近似解就是由这组基张成的函数
+$$ u_N(x) = U_0 \phi_0(x) + U_1 \phi_1(x) + \cdots + U_N \phi_N(x) $$
+此时$\phi_0$的系数就是函数在左端点的函数值，$\phi_N$的系数就是函数在右端点的函数值。在很多块区域拼起来时，这两个就是边界上的自由度。
+
+根据公式$(2k+1) L_k(x) = L_{k+1}'(x) - L_{k-1}'(x)$得到
+\begin{equation}
+\phi_k'(x) = \left\{ \begin{array}{ll}
+-\frac{1}{2} & k = 0 \\
+\frac{\sqrt{4k+2}}{2} L_{k}(x) & 1 \leq k \leq N-1 \\
+\frac{1}{2} & k = N \\
+\end{array} \right.
+\end{equation}
+
+所以在参考单元上，$(\phi_j'(x), \phi_k'(x))$形成的矩阵是
+\begin{equation}
+\hat{A} = \left[ \begin{matrix}
+\frac12 &  &  &  & -\frac12 \\ 
+& 1 &  &  &  \\ 
+&  & \ddots &  &  \\ 
+&  &  & 1 &  \\ 
+-\frac12 &  &  &  & \frac12
+\end{matrix}  \right]
+\end{equation}
+
+共$3N+5$个非零元，矩阵编号从0开始。矩阵中只有第一行和最后一行，第一列和最后一列特殊。其它满足
+$$ (\phi_k', \phi_k') = 1 \quad \text{其中} \quad (k = 1, 2, \cdots, N-1) $$
+
+同样得到，在参考单元上，$(\phi_j(x), \phi_k(x))$形成的矩阵是
+\begin{equation}
+\hat{B} = \left[ \begin{array}{cccccccc}
+\frac23 & -\frac{1}{\sqrt{6}} & \frac{1}{3\sqrt{10}} &  &  &  &  & \frac13 \\ 
+-\frac{1}{\sqrt{6}} & \frac25 & 0 & -\frac{1}{5\sqrt{21}} &  &  &  & -\frac{1}{\sqrt{6}} \\ 
+\frac{1}{3\sqrt{10}} & 0 & \frac{2}{21} & 0 & * &  &  & -\frac{1}{3\sqrt{10}} \\ 
+& -\frac{1}{5\sqrt{21}} & 0 & * & 0 & * &  &  \\ 
+&  & * & 0 & * & 0 & * &  \\ 
+&  &  & * & 0 & * & 0 &  \\ 
+&  &  &  & * & 0 & * & 0 \\ 
+\frac13 & -\frac{1}{\sqrt{6}} & -\frac{1}{3\sqrt{10}} &  &  &  & 0 & \frac23
+\end{array}  \right]
+\end{equation}
+
+共$3N+5$个非零元，矩阵编号从0开始。矩阵中只有第一行和最后一行，第一列和最后一列特殊。其它满足
+$$ (\phi_k, \phi_k) = \frac{2}{(2k+3)(2k-1)} \quad \text{其中} \quad (k = 1, 2, \cdots, N-1) $$
+和
+$$ (\phi_{k}, \phi_{k+2}) = (\phi_{k+2}, \phi_{k}) = -\frac{1}{(2k+3)\sqrt{(2k+5)(2k+1)}} \quad \text{其中} \quad (k = 1, 2, \cdots, N-3) $$
+
+一维的情况下，由于高次的勒让德多项式都和零次多项式正交，所以
+\begin{equation}
+(1, \phi_j) = \left\{ \begin{array}{ll}
+1 & j = 0 \ \text{or} \ j = N \\
+-\frac{2}{\sqrt{6}} & j = 1 \\
+0 & \text{ortherwise} \\
+\end{array}  \right.
+\end{equation}
+对应向量为
+\begin{equation}
+\hat{F} = \left[ \begin{array}{c}
+1 \\
+-\frac{2}{\sqrt{6}} \\
+0 \\
+\vdots \\
+1 \\
+\end{array} \right]
+\end{equation}
+
+下面考虑边界上的情况。一维的情况下，边界上的内积就是$(\phi_i, \phi_j)_{\partial\hat{\Omega}} = \phi_i(0) \phi_j(0) + \phi_i(1) \phi_j(1)$。对应只有两个矩阵元素不为0，矩阵为
+\begin{equation}
+\hat{H} = \left[ \begin{array}{ccc}
+1 & 0 &  \\ 
+0 & \ddots & 0 \\ 
+& 0 & 1
+\end{array} \right]_{(N+1) \times (N+1)}
+\end{equation}
+
+同样有$(1, \phi_i)_{\partial\hat{\Omega}} = \phi_i(0) + \phi_i(1)$。对应右端向量为
+\begin{equation}
+\hat{G} = \left[ \begin{array}{c}
+1 \\
+0 \\
+\vdots \\
+1 \\
+\end{array} \right]
+\end{equation}
+
+此时，对于数值解
+$$ u_N(x) = \sum_{n = 0}^{N} U_{n} \phi_n(x) $$
+对应的系数向量$U = (U_0, U_1, \cdots, U_N)$，双线性型表示为
+$$ (\nabla u_N, \nabla v_N) = U^T \hat{A} V \qquad (u_N, v_N) = U^T \hat{B} V \qquad (1, v_N) = \hat{F}^T V $$
+$$ (u_N, v_N)_{\partial\hat{\Omega}} = U^T \hat{H} V \qquad (1, v_N)_{\partial\hat{\Omega}} = \hat{G}^T V $$
+
+如果不对区域分割，$V(x)$是整体常数，直接在参考单元上求解，就相当于直接使用谱方法求解。要求解的方程组是
+\begin{equation}
+(\hat{A} + V \hat{B} + h_0 \hat{H}) U = \hat{F} + g_0 \hat{G} \qquad \text{and} \qquad (\hat{A} + V \hat{B} + h_0 \hat{H}) U = \lambda \hat{B} U
+\end{equation}
+
+
+下面我们考虑如何把空间分割，并把不同的区域拼合起来。
+
+对于长度为$h_m$的一般单元$\Omega^{(m)} = [x_m, x_{m+1}]$，设$\chi_m$是参考单元到当前单元的仿射变换，就得到当前单元上的基函数为$\{\phi_{k}(\chi_m^{-1}(x))\}$
+
+因为一维的变换就是区间伸缩和平移，所以
+$$ \chi_m(x) = \frac{h_m}{2} x + b_m \qquad \chi_m'(x) = \frac{h_m}{2} $$
+
+当前单元上的内积为
+$$ (\phi^{(m)}_i, \phi^{(m)}_j) = \int_{x_m}^{x_{m+1}} \phi_{i}(\chi_m^{-1}(x)) \phi_{j}(\chi_m^{-1}(x)) \ dx $$
+
+积分变换的过程省略，在小区间上的矩阵是
+$$ A^{(m)} = \frac{2}{h_m} \hat{A} \qquad B^{(m)} = \frac{h_m}{2} \hat{B} \qquad F^{(m)} = \frac{h_m}{2} \hat{F} $$
+边界不用管，拼合之后的边界就变了。
+
+下面要把小区间上的自由度对应到整体的自由度，在这个过程中要保证整体的函数是连续的，就是$\Omega^{(m)}$上的自由度$U^{(m)}_N$和$\Omega^{(m+1)}$上的自由度$U^{(m+1)}_0$必须是同一个。这样，局部编号$U^{(m)}_n$的自由度对应总体自由度为$m N + n$（所有的编号都是从0开始的）。
+
+(此处应该有图)
+
+对于边界，只要考虑$\Omega^{(0)}$上的$U^{(0)}_0$和$\Omega^{(M-1)}$上的自由度$U^{(M-1)}_N$，在最后的矩阵里把它们分别加上$h_0$就可以了。就是相当于加上
+\begin{equation}
+\tilde{H} = \left[ \begin{array}{ccc}
+1 & 0 &  \\ 
+0 & \ddots & 0 \\ 
+& 0 & 1
+\end{array} \right]_{(MN+1) \times (MN+1)}
+\end{equation}
+
+右端项同样也要加上
+\begin{equation}
+\hat{G} = \left[ \begin{array}{c}
+1 \\
+0 \\
+\vdots \\
+1 \\
+\end{array} \right]_{MN+1}
+\end{equation}
+
+\subsection{二维的情况}
+
+二维的参考单元是$\hat{\Omega} = [-1,1] \times [-1,1]$，二维的基函数是张量形式的
+$$ u_N(x,y) = \sum_{n_1,n_2 = 0}^{N_1, N_2} U_{n_1,n_2} \phi_{n_1}(x) \phi_{n_2}(y) $$
+
+在参考单元上$(\nabla \phi_i(x) \phi_j(y), \nabla \phi_k(x) \phi_l(y))$就是
+\begin{align*}
+& \int_{[-1,1] \times [-1,1]} \phi_i'(x) \phi_j(y) \phi_k'(x) \phi_l(y) \ dx dy + \int_{[-1,1] \times [-1,1]} \phi_i(x) \phi_j'(y) \phi_k(x) \phi_l'(y) \ dx dy \\
+= & \int_{-1}^{1} \phi_i'(x) \phi_k'(x) \ dx \int_{-1}^{1} \phi_j(y) \phi_l(y) \ dy + \int_{-1}^{1} \phi_i(x) \phi_k(x) \ dx \int_{-1}^{1} \phi_j'(y) \phi_l'(y) \ dy \\
+= & \hat{A}_{i,k} \hat{B}_{j,l} + \hat{B}_{i,k} \hat{A}_{j,l}
+\end{align*}
+
+在参考单元上$(\phi_i(x) \phi_j(y), \phi_k(x) \phi_l(y))$就是
+\begin{align*}
+& \int_{[-1,1] \times [-1,1]} \phi_i(x) \phi_j(y) \phi_k(x) \phi_l(y) \ dx dy \\
+= & \int_{-1}^{1} \phi_i(x) \phi_k(x) \ dx \int_{-1}^{1} \phi_j(y) \phi_l(y) \ dy \\
+= & \hat{B}_{i,k} \hat{B}_{j,l}
+\end{align*}
+
+在参考单元上$(1, \phi_i(x) \phi_j(y))$就是
+\begin{align*}
+& \int_{[-1,1] \times [-1,1]} \phi_i(x) \phi_j(y) \ dx dy = \int_{-1}^{1} \phi_i(x) \ dx \int_{-1}^{1} \phi_j(y) \ dy = \hat{F}_{i} \hat{F}_{j}
+\end{align*}
+
+在参考单元边界上$(\phi_i(x) \phi_j(y), \phi_k(x) \phi_l(y))_{\partial \hat{\Omega}}$就是
+\begin{align*}
+& \int_{-1}^{1} \phi_i(1) \phi_j(y) \phi_k(1) \phi_l(y) \ dy + \int_{-1}^{1} \phi_i(-1) \phi_j(y) \phi_k(-1) \phi_l(y) \ dy \\
++ & \int_{-1}^{1} \phi_i(x) \phi_j(1) \phi_k(x) \phi_l(1) \ dx + \int_{-1}^{1} \phi_i(x) \phi_j(-1) \phi_k(x) \phi_l(-1) \ dx \\
+= & (\phi_j(-1) \phi_l(-1) + \phi_j(1) \phi_l(1)) \int_{-1}^{1} \phi_i(x) \phi_k(x) \ dx \\
++ & (\phi_i(-1) \phi_k(-1) + \phi_i(1) \phi_k(1)) \int_{-1}^{1} \phi_j(y) \phi_l(y) \ dy \\
+= & \hat{H}_{i,k} \hat{B}_{j,l} + \hat{B}_{i,k} \hat{H}_{j,l}
+\end{align*}
+
+在参考单元边界上$(1, \phi_k(x) \phi_l(y))_{\partial \hat{\Omega}}$就是
+\begin{align*}
+& \int_{-1}^{1} \phi_k(1) \phi_l(y) \ dy + \int_{-1}^{1} \phi_k(-1) \phi_l(y) \ dy + \int_{-1}^{1} \phi_k(x) \phi_l(1) \ dx + \int_{-1}^{1} \phi_k(x) \phi_l(-1) \ dx \\
+= & (\phi_l(-1) + \phi_l(1)) \int_{-1}^{1} \phi_k(x) \ dx + (\phi_k(-1) + \phi_k(1)) \int_{-1}^{1} \phi_l(y) \ dy \\
+= & \hat{G}_{k} \hat{F}_{l} + \hat{F}_{k} \hat{G}_{l}
+\end{align*}
+
+此时，对于
+$$ u_N(x,y) = \sum_{i,j = 0}^{N_x, N_y} U_{i,j} \phi_{i}(x) \phi_{j}(y) $$
+双线性型表示为
+$$ (\nabla u_N, \nabla v_N) = \sum_{i,j,k,l} U_{i,j} (\hat{A}_{i,k} \hat{B}_{j,l} + \hat{B}_{i,k} \hat{A}_{j,l}) V_{k,l} $$
+$$ (u_N, v_N) = \sum_{i,j,k,l} U_{i,j} \hat{B}_{i,k} \hat{B}_{j,l} V_{k,l} $$
+$$ (u_N, v_N)_{\partial\hat{\Omega}} = \sum_{i,j,k,l} U_{i,j} (\hat{H}_{i,k} \hat{B}_{j,l} + \hat{B}_{i,k} \hat{H}_{j,l}) V_{k,l} $$
+$$ (1, v_N) = \sum_{i,j} \hat{F}_i V_{i,j} \hat{F}_j $$
+$$ (1, v_N)_{\partial\hat{\Omega}} = \sum_{i,j} \sum_{i,j} V_{i,j} (\hat{G}_i \hat{F}_j + \hat{F}_i \hat{G}_j)$$
+
+对应的系数向量拉直成一维的
+$$U = (U_{0,0}, U_{0,1}, \cdots, U_{0,N_2}, U_{1,0}, U_{1,1}, \cdots, U_{N_1,N_2})$$
+此时$U_{n_1,n_2}$对应的一维下标是$n_1 (N_1+1) + n_2$。双线性型表示为
+$$ (\nabla u_N, \nabla v_N) = U^T (\hat{A} \otimes \hat{B} + \hat{B} \otimes \hat{A}) V \qquad (u_N, v_N) = U^T (\hat{B} \otimes \hat{B}) V \qquad (1, v_N) = (\hat{F} \otimes \hat{F})^T V $$
+$$ (u_N, v_N)_{\partial\hat{\Omega}} = U^T (\hat{B} \otimes \hat{H} + \hat{H} \otimes \hat{B}) V \qquad (1, v_N)_{\partial\hat{\Omega}} = (\hat{F} \otimes \hat{G} + \hat{G} \otimes \hat{F})^T V $$
+
+如果不对区域分割，$V(x)$是整体常数，直接在参考单元上求解，就相当于直接使用谱方法求解。要求解的方程组是
+\begin{equation}
+[(\hat{A} \otimes \hat{B} + \hat{B} \otimes \hat{A}) + V (\hat{B} \otimes \hat{B}) + h_0 (\hat{B} \otimes \hat{H} + \hat{H} \otimes \hat{B})] U = (\hat{F} \otimes \hat{F}) + g_0 (\hat{F} \otimes \hat{G} + \hat{G} \otimes \hat{F})
+\end{equation}
+\begin{equation}
+[(\hat{A} \otimes \hat{B} + \hat{B} \otimes \hat{A}) + V (\hat{B} \otimes \hat{B}) + h_0 (\hat{B} \otimes \hat{H} + \hat{H} \otimes \hat{B})] U = \lambda (\hat{B} \otimes \hat{B}) U
+\end{equation}
+
+下面我们考虑如何把空间分割，并把不同的区域拼合起来。
+
+对于长度为$h_{m_1} \times h_{m_2}$的一般单元$\Omega^{(m_1, m_2)} = [x_{m_1}, x_{m_1+1}] \times [y_{m_2}, y_{m_2+1}]$，设$\chi$是参考单元到当前单元的仿射变换，就得到当前单元上的基函数为$\{\phi_{n_1}(\chi^{-1}(x,y)) \phi_{n_2}(\chi^{-1}(x,y))\}$。
+
+因为只考虑矩形分割，所以二维的仿射变换也可以看成分别在每个维度上伸缩和平移。积分变换的部分省略，在小区间上的矩阵是
+$$ A^{(m)} = \hat{A} \qquad B^{(m)} = \frac{4}{h_{m_1} h_{m_2}} \hat{B} \qquad F^{(m)} = \frac{h_{m_1} h_{m_2}}{2} \hat{F} $$
+边界不用管，拼合之后的边界就变了。
+
+下面要把小区域上的自由度对应到整体的自由度，在这个过程中要保证整体的函数是连续的。
+
+小区域$\Omega^{(m_1, m_2)}$的右边界为
+$$ \sum_{n_1,n_2 = 0}^{N_1, N_2} U_{n_1,n_2}^{(m_1, m_2)} \phi_{n_1}(1) \phi_{n_2}(y) = \sum_{n_2 = 0}^{N_2} U_{N_1,n_2}^{(m_1, m_2)} \phi_{n_2}(y) $$
+
+小区域$\Omega^{(m_1+1, m_2)}$的左边界为
+$$ \sum_{n_1,n_2 = 0}^{N_1, N_2} U_{n_1,n_2}^{(m_1+1, m_2)} \phi_{n_1}(-1) \phi_{n_2}(y) = \sum_{n_2 = 0}^{N_2} U_{0,n_2}^{(m_1+1, m_2)} \phi_{n_2}(y) $$
+
+想要让函数整体连续，必须在边界上基函数的系数相同，就是$U_{0,n_2}^{(m_1+1, m_2)}$和$U_{N_1,n_2}^{(m_1, m_2)}$必须是同一个。
+
+对上下左右四条边界的要求都是一样的。最后得到单元自由度$U_{n_1,n_2}^{(m_1, m_2)}$对应的总体二维下标是$(m_1 N_1 + n1, + m2 N_2 + n2)$，再拉直成一维坐标就是$(m_1 N_1 + n1)(M_1 N_1 + 1) + m2 N_2 + n2$所有的编号都是从0开始的。
+
+(此处也应该有图)
+
+\textbf{注：}程序里面只有$N_1 = N_2$且$M_1 = M_2$的情况。
+
+下面考虑边界，边界分为上下左右四部分考虑。
+
+左边界是由$\Omega^{(0, 0)}, \Omega^{(0, 1)}, \cdots, \Omega^{(0, M_2-1)}$的左边界拼接成的。在$\Omega^{(0, m_2)}$的左边界上，$(u_N, v_N)$表示为
+$$ \sum_{i,j,k,l} U_{i,j}^{(0, m_2)} V_{k,l}^{(0, m_2)} \int_{-1}^{1} \phi_i(-1) \phi_j(y) \phi_k(-1) \phi_l(y) \ dy = \sum_{j,l} U_{0,j}^{(0, m_2)} V_{0,l}^{(0, m_2)} \hat{B}_{j,l} $$
+
+对于左边界，系数矩阵拉直成一维之后的单元刚度矩阵是$\hat{B} \otimes \hat{H}^0$。同理，右边界的是$\hat{B} \otimes \hat{H}^1$，上边界的是$\hat{H}^1 \otimes \hat{B}$，下边界的是$\hat{H}^0 \otimes \hat{B}$。
+
+\begin{equation}
+\hat{H}^0 = \left[ \begin{array}{ccc}
+1 & 0 &  \\ 
+0 & \ddots & 0 \\ 
+& 0 & 0
+\end{array} \right]_{(N+1) \times (N+1)}
+\qquad
+\hat{H}^1 = \left[ \begin{array}{ccc}
+0 & 0 &  \\ 
+0 & \ddots & 0 \\ 
+& 0 & 1
+\end{array} \right]_{(N+1) \times (N+1)}
+\end{equation}
+
+对于右端项，同样的。左边界是$\hat{F} \otimes \hat{G}^0$。同理，右边界的是$\hat{F} \otimes \hat{G}^1$，上边界的是$\hat{G}^1 \otimes \hat{F}$，下边界的是$\hat{G}^0 \otimes \hat{F}$。
+
+\begin{equation}
+\hat{G}^0 = \left[ \begin{array}{c}
+1 \\
+0 \\
+\vdots \\
+0 \\
+\end{array} \right]_{N+1}
+\qquad
+\hat{G}^1 = \left[ \begin{array}{c}
+0 \\
+0 \\
+\vdots \\
+1 \\
+\end{array} \right]_{N+1}
+\end{equation}
+
+边界上的尺度变换系数是$h_m/2$
+
+%\subsection{三维的情况}
+%三维的情况不仅要考虑如何在面上拼接，还要考虑如何在棱上拼接。这个太复杂，先不考虑。
+
+\end{document}
