@@ -50,12 +50,16 @@ phi2d = phi0' * diag(wn2d) * phi0;
         end
     end
 
-A = zeros((Mx*N+1)*(My*N+1), (Mx*N+1)*(My*N+1));
-B = zeros((Mx*N+1)*(My*N+1), (Mx*N+1)*(My*N+1));
-
+nnzA = 0;
+iA = zeros(Mx*My*(N+1)^4, 1);
+jA = zeros(Mx*My*(N+1)^4, 1);
+vA = zeros(Mx*My*(N+1)^4, 1);
+nnzB = 0;
+iB = zeros(Mx*My*(N+1)^4, 1);
+jB = zeros(Mx*My*(N+1)^4, 1);
+vB = zeros(Mx*My*(N+1)^4, 1);
 for mx =1:Mx
     for my = 1:My
-        
         lxn = (xn2d + 1)/2 * hx(mx) + mesh.x(mx);
         lyn = (yn2d + 1)/2 * hy(my) + mesh.y(my);
         la11n = arrayfun(prob.a11, lxn, lyn);
@@ -76,11 +80,27 @@ for mx =1:Mx
         
         lB = (hx(mx)*hy(my)/4) * phi2d;
         
-        gi = l2g(mx, my, 1:(N+1)^2);
-        A(gi, gi) = A(gi, gi) + lA;
-        B(gi, gi) = B(gi, gi) + lB;
+%         gind = l2g(mx, my, 1:(N+1)^2);
+%         A(gind, gind) = A(gind, gind) + lA;
+%         B(gind, gind) = B(gind, gind) + lB;
+
+        gind = l2g(mx, my, 1:(N+1)^2);
+        [gj, gi] = meshgrid(gind, gind);
+        
+        iA(nnzA+1: nnzA+(N+1)^4) = gi(:);
+        jA(nnzA+1: nnzA+(N+1)^4) = gj(:);
+        vA(nnzA+1: nnzA+(N+1)^4) = lA(:);
+        nnzA = nnzA + (N+1)^4;
+        
+        iB(nnzB+1: nnzB+(N+1)^4) = gi(:);
+        jB(nnzB+1: nnzB+(N+1)^4) = gj(:);
+        vB(nnzB+1: nnzB+(N+1)^4) = lB(:);
+        nnzB = nnzB + (N+1)^4;
     end
 end
+
+A = sparse(iA, jA, vA, (Mx*N+1)*(My*N+1), (Mx*N+1)*(My*N+1));
+B = sparse(iB, jB, vB, (Mx*N+1)*(My*N+1), (Mx*N+1)*(My*N+1));
 
 if prob.bd == 'D'
     temp = reshape(1:(Mx*N+1)*(My*N+1), Mx*N+1, My*N+1);
@@ -106,8 +126,8 @@ elseif prob.bd == 'R'
         
         lA = (hx(mx)/2) * phi' * diag(wn.*lhn) * phi;
         
-        gi = l2g(mx, my, 1:N+1, 1);
-        A(gi, gi) = A(gi, gi) + lA;
+        gind = l2g(mx, my, 1:N+1, 1);
+        A(gind, gind) = A(gind, gind) + lA;
     end
     
     % top boundary
@@ -119,8 +139,8 @@ elseif prob.bd == 'R'
         
         lA = (hx(mx)/2) * phi' * diag(wn.*lhn) * phi;
         
-        gi = l2g(mx, my, 1:N+1, N+1);
-        A(gi, gi) = A(gi, gi) + lA;
+        gind = l2g(mx, my, 1:N+1, N+1);
+        A(gind, gind) = A(gind, gind) + lA;
     end
     
     % left boundary
@@ -132,8 +152,8 @@ elseif prob.bd == 'R'
         
         lA = (hy(my)/2) * phi' * diag(wn.*lhn) * phi;
         
-        gi = l2g(mx, my, 1, 1:N+1);
-        A(gi, gi) = A(gi, gi) + lA;
+        gind = l2g(mx, my, 1, 1:N+1);
+        A(gind, gind) = A(gind, gind) + lA;
     end
     
     % right boundary
@@ -145,8 +165,8 @@ elseif prob.bd == 'R'
         
         lA = (hy(my)/2) * phi' * diag(wn.*lhn) * phi;
         
-        gi = l2g(mx, my, N+1, 1:N+1);
-        A(gi, gi) = A(gi, gi) + lA;
+        gind = l2g(mx, my, N+1, 1:N+1);
+        A(gind, gind) = A(gind, gind) + lA;
     end
     
     [U, lam] = eigs(A, B, num, 0);

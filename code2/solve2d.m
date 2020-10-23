@@ -21,7 +21,6 @@ phix = kron(phi, dphi);
 phiy = kron(dphi, phi);
 
 % local to global
-
     function gn = l2g(mx, my, nx, ny)
         
         if nargin < 4
@@ -45,7 +44,10 @@ phiy = kron(dphi, phi);
         end
     end
 
-A = zeros((Mx*N+1)*(My*N+1), (Mx*N+1)*(My*N+1));
+nnzA = 0;
+iA = zeros(Mx*My*(N+1)^4, 1);
+jA = zeros(Mx*My*(N+1)^4, 1);
+vA = zeros(Mx*My*(N+1)^4, 1);
 F = zeros((Mx*N+1)*(My*N+1), 1);
 
 for mx =1:Mx
@@ -72,11 +74,23 @@ for mx =1:Mx
         
         lF = (hx(mx)*hy(my)/4) * phi0' * (lfn.*wn2d);
         
-        gi = l2g(mx, my, 1:(N+1)^2);
-        A(gi, gi) = A(gi, gi) + lA;
-        F(gi) = F(gi) + lF;
+%         gind = l2g(mx, my, 1:(N+1)^2);
+%         A(gind, gind) = A(gind, gind) + lA;
+%         F(gind) = F(gind) + lF;
+        
+        gind = l2g(mx, my, 1:(N+1)^2);
+        [gj, gi] = meshgrid(gind, gind);
+        
+        iA(nnzA+1: nnzA+(N+1)^4) = gi(:);
+        jA(nnzA+1: nnzA+(N+1)^4) = gj(:);
+        vA(nnzA+1: nnzA+(N+1)^4) = lA(:);
+        nnzA = nnzA + (N+1)^4;
+        
+        F(gind) = F(gind) + lF;
     end
 end
+
+A = sparse(iA, jA, vA, (Mx*N+1)*(My*N+1), (Mx*N+1)*(My*N+1));
 
 if prob.bd == 'D'
     
@@ -91,12 +105,12 @@ if prob.bd == 'D'
         
         lU = lP0 \ (phi' * (lu0n.*wn));
         
-        gi = l2g(mx, my, 1:N+1, 1);
-        A(gi, :) = 0;
+        gind = l2g(mx, my, 1:N+1, 1);
+        A(gind, :) = 0;
         for k = 1:N+1
-            A(gi(k), gi(k)) = 1;
+            A(gind(k), gind(k)) = 1;
         end
-        F(gi) = lU;
+        F(gind) = lU;
     end
     
     % top boundary
@@ -108,12 +122,12 @@ if prob.bd == 'D'
         
         lU = lP0 \ (phi' * (lu0n.*wn));
         
-        gi = l2g(mx, my, 1:N+1, N+1);
-        A(gi, :) = 0;
+        gind = l2g(mx, my, 1:N+1, N+1);
+        A(gind, :) = 0;
         for k = 1:N+1
-            A(gi(k), gi(k)) = 1;
+            A(gind(k), gind(k)) = 1;
         end
-        F(gi) = lU;
+        F(gind) = lU;
     end
     
     % left boundary
@@ -125,12 +139,12 @@ if prob.bd == 'D'
         
         lU = lP0 \ (phi' * (lu0n.*wn));
         
-        gi = l2g(mx, my, 1, 1:N+1);
-        A(gi, :) = 0;
+        gind = l2g(mx, my, 1, 1:N+1);
+        A(gind, :) = 0;
         for k = 1:N+1
-            A(gi(k), gi(k)) = 1;
+            A(gind(k), gind(k)) = 1;
         end
-        F(gi) = lU;
+        F(gind) = lU;
     end
     
     % right boundary
@@ -142,12 +156,12 @@ if prob.bd == 'D'
         
         lU = lP0 \ (phi' * (lu0n.*wn));
         
-        gi = l2g(mx, my, N+1, 1:N+1);
-        A(gi, :) = 0;
+        gind = l2g(mx, my, N+1, 1:N+1);
+        A(gind, :) = 0;
         for k = 1:N+1
-            A(gi(k), gi(k)) = 1;
+            A(gind(k), gind(k)) = 1;
         end
-        F(gi) = lU;
+        F(gind) = lU;
     end
     
     U = A \ F;
@@ -165,9 +179,9 @@ elseif prob.bd == 'R'
         lA = (hx(mx)/2) * phi' * diag(wn.*lhn) * phi;
         lF = (hx(mx)/2) * phi' * (lgn.*wn);
         
-        gi = l2g(mx, my, 1:N+1, 1);
-        A(gi, gi) = A(gi, gi) + lA;
-        F(gi) = F(gi) + lF;
+        gind = l2g(mx, my, 1:N+1, 1);
+        A(gind, gind) = A(gind, gind) + lA;
+        F(gind) = F(gind) + lF;
     end
     
     % top boundary
@@ -181,9 +195,9 @@ elseif prob.bd == 'R'
         lA = (hx(mx)/2) * phi' * diag(wn.*lhn) * phi;
         lF = (hx(mx)/2) * phi' * (lgn.*wn);
         
-        gi = l2g(mx, my, 1:N+1, N+1);
-        A(gi, gi) = A(gi, gi) + lA;
-        F(gi) = F(gi) + lF;
+        gind = l2g(mx, my, 1:N+1, N+1);
+        A(gind, gind) = A(gind, gind) + lA;
+        F(gind) = F(gind) + lF;
     end
     
     % left boundary
@@ -197,9 +211,9 @@ elseif prob.bd == 'R'
         lA = (hy(my)/2) * phi' * diag(wn.*lhn) * phi;
         lF = (hy(my)/2) * phi' * (lgn.*wn);
         
-        gi = l2g(mx, my, 1, 1:N+1);
-        A(gi, gi) = A(gi, gi) + lA;
-        F(gi) = F(gi) + lF;
+        gind = l2g(mx, my, 1, 1:N+1);
+        A(gind, gind) = A(gind, gind) + lA;
+        F(gind) = F(gind) + lF;
     end
     
     % right boundary
@@ -213,9 +227,9 @@ elseif prob.bd == 'R'
         lA = (hy(my)/2) * phi' * diag(wn.*lhn) * phi;
         lF = (hy(my)/2) * phi' * (lgn.*wn);
         
-        gi = l2g(mx, my, N+1, 1:N+1);
-        A(gi, gi) = A(gi, gi) + lA;
-        F(gi) = F(gi) + lF;
+        gind = l2g(mx, my, N+1, 1:N+1);
+        A(gind, gind) = A(gind, gind) + lA;
+        F(gind) = F(gind) + lF;
     end
     
     U = A \ F;
