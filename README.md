@@ -1,5 +1,6 @@
 # spec-element
 
+Solving elliptic PDEs on square domian by spectrum element method.
 用谱元法求解方形区域上的变系数椭圆方程
 
 notes1 + code1：模拟Anderson局部化，用谱元法求解分片随机势的薛定谔方程
